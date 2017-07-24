@@ -1,7 +1,9 @@
 package com.example.activitytest;
 
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -11,14 +13,24 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
-public class MainActivity extends AppCompatActivity {
+import com.dd.morphingbutton.MorphingButton;
+
+public class MainActivity extends BaseActivity {
+
+    private int mMorphCounter1 = 1;
+
+    private int mMorphCounter2 = 1;
+
+    public static void startThisActivity(@NonNull Context context) {
+        context.startActivity(new Intent(context, MainActivity.class));
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.first_layout);
-        Button button = (Button) findViewById(R.id.button_1);
-        button.setOnClickListener(new View.OnClickListener() {
+        final MorphingButton btnMorph1 = (MorphingButton) findViewById(R.id.button_1);
+        btnMorph1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 //显示Intent用法
@@ -40,10 +52,24 @@ public class MainActivity extends AppCompatActivity {
 //                intent.putExtra("extra_data", data);
 //                startActivity(intent);
                 //返回数据给上一个活动
-                Intent intent = new Intent(MainActivity.this, SecondActivity.class);
-                startActivityForResult(intent, 1);
+                onMorphButton1Clicked(btnMorph1);
+//                Intent intent = new Intent(MainActivity.this, SecondActivity.class);
+//                startActivityForResult(intent, 1);
             }
         });
+
+        final MorphingButton btnMorph2 = (MorphingButton) findViewById(R.id.button_4);
+        btnMorph2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                onMorphButton2Clicked(btnMorph2);
+//                Intent intent = new Intent(MainActivity.this, SecondActivity.class);
+//                startActivityForResult(intent, 1);
+            }
+        });
+
+        morphToSquare(btnMorph1, 0);
+        morphToFailure(btnMorph2, 0);
     }
 
     @Override
@@ -77,5 +103,61 @@ public class MainActivity extends AppCompatActivity {
                 break;
             default:
         }
+    }
+
+    private void onMorphButton1Clicked(final MorphingButton btnMorph) {
+        if (mMorphCounter1 == 0) {
+            mMorphCounter1++;
+            morphToSquare(btnMorph, integer(R.integer.mb_animation));
+        } else if (mMorphCounter1 == 1) {
+            mMorphCounter1 = 0;
+            morphToSuccess(btnMorph);
+        }
+    }
+
+    private void onMorphButton2Clicked(final MorphingButton btnMorph) {
+        if (mMorphCounter2 == 0) {
+            mMorphCounter2++;
+            morphToFailure(btnMorph,  integer(R.integer.mb_animation));
+        } else if (mMorphCounter2 == 1) {
+            mMorphCounter2 = 0;
+            morphToSquare(btnMorph, integer(R.integer.mb_animation));
+        }
+    }
+
+    private void morphToSquare(final MorphingButton btnMorph, int duration) {
+        MorphingButton.Params square = MorphingButton.Params.create()
+                .duration(duration)
+                .cornerRadius(dimen(R.dimen.mb_corner_radius_2))
+                .width(dimen(R.dimen.mb_width_200))
+                .height(dimen(R.dimen.mb_height_56))
+                .color(color(R.color.mb_blue))
+                .colorPressed(color(R.color.mb_blue_dark))
+                .text(getString(R.string.mb_button));
+        btnMorph.morph(square);
+    }
+
+    private void morphToSuccess(final MorphingButton btnMorph) {
+        MorphingButton.Params circle = MorphingButton.Params.create()
+                .duration(integer(R.integer.mb_animation))
+                .cornerRadius(dimen(R.dimen.mb_height_56))
+                .width(dimen(R.dimen.mb_height_56))
+                .height(dimen(R.dimen.mb_height_56))
+                .color(color(R.color.mb_green))
+                .colorPressed(color(R.color.mb_green_dark))
+                .icon(R.drawable.ic_done);
+        btnMorph.morph(circle);
+    }
+
+    private void morphToFailure(final MorphingButton btnMorph, int duration) {
+        MorphingButton.Params circle = MorphingButton.Params.create()
+                .duration(duration)
+                .cornerRadius(dimen(R.dimen.mb_height_56))
+                .width(dimen(R.dimen.mb_height_56))
+                .height(dimen(R.dimen.mb_height_56))
+                .color(color(R.color.mb_red))
+                .colorPressed(color(R.color.mb_red_dark))
+                .icon(R.drawable.ic_lock);
+        btnMorph.morph(circle);
     }
 }
